@@ -236,7 +236,9 @@ angular.module('ngImg', [])
         angular.forEach(srcList, function (imgSrc) {
           var dfd = $q.defer();
           _loadImg(imgSrc, function (img) {
-            dfd.resolve(img);
+            $rootScope.$apply(function () {
+              dfd.resolve(img);
+            });
           }, poolName, copies);
           promises.push(dfd.promise);
         });
