@@ -1,0 +1,4 @@
+node_modules
+ngImg.sublime-*
+.tern-port
+.DS_Store

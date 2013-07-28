@@ -1,0 +1,31 @@
+{
+  "name": "ngImg",
+  "version": "0.0.1",
+  "description": "Best friend of handcrafted image loading in AngularJS.",
+  "main": "ngImg.js",
+  "directories": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pc035860/ngImg.git"
+  },
+  "keywords": [
+    "angularjs",
+    "image",
+    "load",
+    "ngImg"
+  ],
+  "author": "Robin Fan",
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "gitHead": "f1cf7e151cb6756ca3e7188514be27cabd3ad2e1",
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-uglify": "~0.2.0",
+    "grunt-contrib-jshint": "~0.4.3",
+    "grunt-contrib-watch": "~0.5.0",
+    "grunt-contrib-connect": "~0.3.0"
+  }
+}
