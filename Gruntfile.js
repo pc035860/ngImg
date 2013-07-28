@@ -31,7 +31,7 @@ module.exports = function(grunt) {
       },
       src: {
         files: '<%= pkg.name %>.js',
-        tasks: ['default'],
+        tasks: ['default']
       }
     },
     connect: {
