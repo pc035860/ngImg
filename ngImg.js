@@ -269,7 +269,7 @@ angular.module('ngImg', [])
  * @description
  * Communicates with $imgPool to retrive / put back image.
  *
- * @param {string} ng-img the image src, will be queried from the pool.
+ * @param {string}  ng-img  the image src, will be queried from the pool.
  */
 .directive('ngImg', [
          '$imgPool', '$log',
