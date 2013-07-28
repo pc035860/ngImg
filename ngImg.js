@@ -211,7 +211,7 @@ angular.module('ngImg', [])
             var pool = $imgPool(poolName);
             copies = copies || 1;
             while (copies--) {
-              pool.put(src, res);
+              pool.put(src, (copies === 0) ? res : res.cloneNode(true));
             }
           }
 
