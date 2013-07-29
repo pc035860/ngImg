@@ -278,9 +278,6 @@ angular.module('ngImg', [])
 function ($imgPool,   $log) {
   return {
     restrict: 'EA',
-    controller: [function () {
-      // empty controller for other directives requirements
-    }],
     compile: function(tElm, tAttrs, transclude) {
       tElm.html('');
       return function postLink(scope, iElm, iAttrs) {
@@ -327,82 +324,65 @@ function ($imgPool,   $log) {
           }
         });
 
+
+        ////////////////
+        // ngImgClass //
+        ////////////////
+        (function () {
+          // reference: ngClass.js
+          var isObject = angular.isObject,
+              isArray = angular.isArray,
+              equals = angular.equals,
+              copy = angular.copy,
+              map = function (obj, iterator, context) {
+                var results = [];
+                angular.forEach(obj, function(value, index, list) {
+                  results.push(iterator.call(context, value, index, list));
+                });
+                return results;
+              };
+          
+          var dirName = 'ngImgClass',
+              oldVal;
+
+          // watch for scope expression change
+          scope.$watch(iAttrs[dirName], watchAction, true);
+
+          // re-evaluate on string value change
+          iAttrs.$observe('class', function(value) {
+            var dClass = scope.$eval(iAttrs[dirName]);
+            watchAction(dClass, dClass);
+          });
+
+          function watchAction(newVal) {
+            if (oldVal && !equals(newVal,oldVal)) {
+              removeClass(oldVal);
+            }
+            addClass(newVal);
+            oldVal = copy(newVal);
+          }
+
+          function removeClass(classVal) {
+            if (isObject(classVal) && !isArray(classVal)) {
+              classVal = map(classVal, function(v, k) { 
+                if (v) { return k; }
+              });
+            }
+            iElm.find('img').removeClass(isArray(classVal) ? classVal.join(' ') : classVal);
+          }
+
+          function addClass(classVal) {
+            if (isObject(classVal) && !isArray(classVal)) {
+              classVal = map(classVal, function(v, k) {
+                if (v) { return k; }
+              });
+            }
+            if (classVal) {
+              iElm.find('img').addClass(isArray(classVal) ? classVal.join(' ') : classVal);
+            }
+          }
+        })();
       };
-    }
-  };
-}])
-
-.directive('ngImgClass', [function () {
-  var dirName = 'ngImgClass';
-  return {
-    require: 'ngImg',
-    restrict: 'A',
-    link: function(scope, iElm, iAttrs) {
-      // reference: ngClass.js
-      var oldVal;
-
-      scope.$watch(iAttrs[dirName], watchAction, true);
-
-      iAttrs.$observe('class', function(value) {
-        var dClass = scope.$eval(iAttrs[dirName]);
-        watchAction(dClass, dClass);
-      });
-
-      function watchAction(newVal) {
-        if (oldVal && !equals(newVal,oldVal)) {
-          removeClass(oldVal);
-        }
-        addClass(newVal);
-        oldVal = copy(newVal);
-      }
-
-      function removeClass(classVal) {
-        if (isObject(classVal) && !isArray(classVal)) {
-          classVal = map(classVal, function(v, k) { 
-            if (v) {
-              return k;
-            }
-          });
-        }
-        iElm.find('img').removeClass(isArray(classVal) ? classVal.join(' ') : classVal);
-      }
-
-      function addClass(classVal) {
-        if (isObject(classVal) && !isArray(classVal)) {
-          classVal = map(classVal, function(v, k) {
-            if (v) {
-              return k;
-            }
-          });
-        }
-        if (classVal) {
-          iElm.find('img').addClass(isArray(classVal) ? classVal.join(' ') : classVal);
-        }
-      }
-
-      function isObject(val) {
-        return angular.isObject(val);
-      }
-
-      function isArray(val) {
-        return angular.isArray(val);
-      }
-
-      function equals(valA, valB) {
-        return angular.equals(valA, valB);
-      }
-
-      function copy(val) {
-        return angular.copy(val);
-      }
-
-      function map(obj, iterator, context) {
-        var results = [];
-        angular.forEach(obj, function(value, index, list) {
-          results.push(iterator.call(context, value, index, list));
-        });
-        return results;
-      }
     }
   };
 }]);
