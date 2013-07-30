@@ -274,13 +274,25 @@ angular.module('ngImg', [])
  * @param {string}  ng-img  the image src, will be queried from the pool.
  */
 .directive('ngImg', [
-         '$imgPool', '$log',
-function ($imgPool,   $log) {
+         '$imgPool', '$log', '$timeout',
+function ($imgPool,   $log,   $timeout) {
   return {
     restrict: 'EA',
     compile: function(tElm, tAttrs, transclude) {
       tElm.html('');
       return function postLink(scope, iElm, iAttrs) {
+        var isObject = angular.isObject,
+            isArray = angular.isArray,
+            equals = angular.equals,
+            copy = angular.copy,
+            map = function (obj, iterator, context) {
+              var results = [];
+              angular.forEach(obj, function(value, index, list) {
+                results.push(iterator.call(context, value, index, list));
+              });
+              return results;
+            };
+
         var pool = $imgPool(iAttrs.pool);
 
         // listen for $destroy
@@ -298,12 +310,22 @@ function ($imgPool,   $log) {
           var $img = iElm.find('img'),
               newImg;
 
+          // ngImgClass check
+          var iClass;
+          if (angular.isDefined(iAttrs.ngImgClass)) {
+            iClass = scope.$eval(iAttrs.ngImgClass);
+          }
+
           if (angular.isDefined(src)) {
             if ($img.length === 0) {
               // new
               newImg = pool.get(src);
               if (newImg) {
                 iElm.append(newImg);
+
+                if (iClass) {
+                  addClass(angular.element(newImg), iClass);
+                }
               }
               else {
                 $log.error('$imgPool failed to hit.', src);
@@ -311,15 +333,29 @@ function ($imgPool,   $log) {
             }
             else if ($img.prop('src') !== src) {
               // change
-              newImg = pool.get(src);
-              if (newImg) {
-                iElm.append(newImg);
-                $img.remove();
-                pool.put($img.prop('src'), $img[0]);
+              
+              // put it back first
+              $img.remove();
+              if (iClass) {
+                removeClass($img, iClass);
               }
-              else {
-                $log.error('$imgPool failed to hit.', src);
-              }
+              pool.put($img.prop('src'), $img[0]);
+
+              // delayed for others put back done
+              $timeout(function () {
+                // get the new one
+                newImg = pool.get(src);
+                if (newImg) {
+                  iElm.append(newImg);
+
+                  if (iClass) {
+                    addClass(angular.element(newImg), iClass);
+                  }
+                }
+                else {
+                  $log.error('$imgPool failed to hit.', src);
+                }
+              });
             }
           }
         });
@@ -330,17 +366,6 @@ function ($imgPool,   $log) {
         ////////////////
         (function () {
           // reference: ngClass.js
-          var isObject = angular.isObject,
-              isArray = angular.isArray,
-              equals = angular.equals,
-              copy = angular.copy,
-              map = function (obj, iterator, context) {
-                var results = [];
-                angular.forEach(obj, function(value, index, list) {
-                  results.push(iterator.call(context, value, index, list));
-                });
-                return results;
-              };
           
           var dirName = 'ngImgClass',
               oldVal;
@@ -355,33 +380,34 @@ function ($imgPool,   $log) {
           });
 
           function watchAction(newVal) {
+            var $img = iElm.find('img');
             if (oldVal && !equals(newVal,oldVal)) {
-              removeClass(oldVal);
+              removeClass($img, oldVal);
             }
-            addClass(newVal);
+            addClass($img, newVal);
             oldVal = copy(newVal);
           }
-
-          function removeClass(classVal) {
-            if (isObject(classVal) && !isArray(classVal)) {
-              classVal = map(classVal, function(v, k) { 
-                if (v) { return k; }
-              });
-            }
-            iElm.find('img').removeClass(isArray(classVal) ? classVal.join(' ') : classVal);
-          }
-
-          function addClass(classVal) {
-            if (isObject(classVal) && !isArray(classVal)) {
-              classVal = map(classVal, function(v, k) {
-                if (v) { return k; }
-              });
-            }
-            if (classVal) {
-              iElm.find('img').addClass(isArray(classVal) ? classVal.join(' ') : classVal);
-            }
-          }
         })();
+
+        function removeClass(elm, classVal) {
+          if (isObject(classVal) && !isArray(classVal)) {
+            classVal = map(classVal, function(v, k) { 
+              if (v) { return k; }
+            });
+          }
+          elm.removeClass(isArray(classVal) ? classVal.join(' ') : classVal);
+        }
+
+        function addClass(elm, classVal) {
+          if (isObject(classVal) && !isArray(classVal)) {
+            classVal = map(classVal, function(v, k) {
+              if (v) { return k; }
+            });
+          }
+          if (classVal) {
+            elm.addClass(isArray(classVal) ? classVal.join(' ') : classVal);
+          }
+        }
       };
     }
   };
