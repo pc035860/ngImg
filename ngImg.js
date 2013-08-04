@@ -25,8 +25,8 @@ angular.module('ngImg', [])
 
   var __config = {
     flushOnRouteChange: true,
-    idPrefix: '$imgPool',
-    poolName: 'default'
+    cacheIdPrefix: '$imgPool',
+    defaultPoolName: 'default'
   };
 
   __provides.config = function (a1, a2) {
@@ -64,7 +64,7 @@ angular.module('ngImg', [])
     }
 
     return function (poolName) {
-      var cId = __config.idPrefix + '.' + (poolName || __config.poolName);
+      var cId = __config.cacheIdPrefix + '.' + (poolName || __config.defaultPoolName);
           cache = $cacheFactory.get(cId) || $cacheFactory(cId),
           wrap = {};
 
@@ -182,17 +182,17 @@ angular.module('ngImg', [])
             aImg = angular.element(img),
             onLoad = function () {
               aImg.unbind('load error');
-              if (angular.isFunction(callback)) {
-                callback(this);
-              }
+
+              (callback || angular.noop)(this);
+
               _quotaRelease();
               _dequeue();
             },
             onError = function () {
               aImg.unbind('load error');
-              if (angular.isFunction(callback)) {
-                callback(false);
-              }
+
+              (callback || angular.noop)(false);
+
               _quotaRelease();
               _dequeue();
             };
@@ -249,9 +249,7 @@ angular.module('ngImg', [])
             }
           }
 
-          if (angular.isFunction(callback)) {
-            callback(res);
-          }
+          (callback || angular.noop)(res);
         });
         _dequeue();
         return img;
@@ -279,9 +277,7 @@ angular.module('ngImg', [])
 
         $q.all(promises)
         .then(function (resList) {
-          if (angular.isFunction(callback)) {
-            callback(resList);
-          }
+          (callback || angular.noop)(resList);
         });
         return promises;
       }
