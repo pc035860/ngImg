@@ -23,10 +23,27 @@ angular.module('ngImg', [])
 .provider('$imgPool', function () {
   var __provides = {};
 
-  __provides.defaults = {
+  var __config = {
     flushOnRouteChange: true,
     idPrefix: '$imgPool',
     poolName: 'default'
+  };
+
+  __provides.config = function (a1, a2) {
+    if (angular.isObject(a1)) {
+      angular.extend(__config, a1);
+    }
+    else if (angular.isString(a1)) {
+      if (angular.isDefined(a2)) {
+        __config[a1] = a2;
+      }
+      else {
+        return __config[a1];
+      }
+    }
+    else {
+      return angular.copy(__config);
+    }
   };
 
   __provides.$get = [
@@ -34,7 +51,7 @@ angular.module('ngImg', [])
   function ($cacheFactory,   $rootScope) {
     var _createdCacheId = {};
 
-    if (__provides.defaults.flushOnRouteChange) {
+    if (__config.flushOnRouteChange) {
       $rootScope.$on('$routeChangeSuccess', function () {
         angular.forEach(_createdCacheId, function (v, cacheId) {
           var cache = $cacheFactory.get(cacheId);
@@ -47,7 +64,7 @@ angular.module('ngImg', [])
     }
 
     return function (poolName) {
-      var cId = __provides.idPrefix + '.' + (poolName || __provides.defaults.poolName);
+      var cId = __config.idPrefix + '.' + (poolName || __config.poolName);
           cache = $cacheFactory.get(cId) || $cacheFactory(cId),
           wrap = {};
 
@@ -122,15 +139,32 @@ angular.module('ngImg', [])
 .provider('$loadImg', function () {
   var __provides = {};
 
-  __provides.defaults = {
+  var __config = {
     requestLimit: 2
+  };
+
+  __provides.config = function (a1, a2) {
+    if (angular.isObject(a1)) {
+      angular.extend(__config, a1);
+    }
+    else if (angular.isString(a1)) {
+      if (angular.isDefined(a2)) {
+        __config[a1] = a2;
+      }
+      else {
+        return __config[a1];
+      }
+    }
+    else {
+      return angular.copy(__config);
+    }
   };
 
   __provides.$get = [
              '$imgPool', '$q',
     function ($imgPool,   $q) {
       var _prepareQueue = [],
-          _requestQuota = __provides.defaults.requestLimit;
+          _requestQuota = __config.requestLimit;
 
       function _dequeue () {
         if (_prepareQueue.length === 0) {
@@ -182,7 +216,7 @@ angular.module('ngImg', [])
       }
 
       function _quotaRelease () {
-        if (_requestQuota < __provides.defaults.requestLimit) {
+        if (_requestQuota < __config.requestLimit) {
           _requestQuota++;
         }
       }
