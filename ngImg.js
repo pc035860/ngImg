@@ -181,7 +181,8 @@ angular.module('ngImg', [])
             callback = qObj[2],
             aImg = angular.element(img),
             onLoad = function () {
-              aImg.unbind('load error');
+              aImg.unbind('load', onLoad);
+              aImg.unbind('error', onError);
 
               (callback || angular.noop)(this);
 
@@ -189,7 +190,8 @@ angular.module('ngImg', [])
               _dequeue();
             },
             onError = function () {
-              aImg.unbind('load error');
+              aImg.unbind('load', onLoad);
+              aImg.unbind('error', onError);
 
               (callback || angular.noop)(false);
 
