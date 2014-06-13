@@ -1,3 +1,4 @@
+/*global angular*/
 angular.module('ngImg', [])
 
 
@@ -49,7 +50,7 @@ angular.module('ngImg', [])
   __provides.$get = [
            '$cacheFactory', '$rootScope', 
   function ($cacheFactory,   $rootScope) {
-    var _createdCacheId = {};
+    var _createdCacheId = {}, $imgPool;
 
     if (__config.flushOnRouteChange) {
       $rootScope.$on('$routeChangeSuccess', function () {
@@ -63,8 +64,8 @@ angular.module('ngImg', [])
       });
     }
 
-    return function (poolName) {
-      var cId = __config.cacheIdPrefix + '.' + (poolName || __config.defaultPoolName);
+    $imgPool = function (poolName) {
+      var cId = __config.cacheIdPrefix + '.' + (poolName || __config.defaultPoolName),
           cache = $cacheFactory.get(cId) || $cacheFactory(cId),
           wrap = {};
 
@@ -85,6 +86,9 @@ angular.module('ngImg', [])
 
       return wrap;
     };
+    $imgPool.config = __config;
+
+    return $imgPool;
 
     function _wrapPut(cache) {
       return function (src, imgElm) {
@@ -161,8 +165,8 @@ angular.module('ngImg', [])
   };
 
   __provides.$get = [
-             '$imgPool', '$q',
-    function ($imgPool,   $q) {
+             '$imgPool', '$q', '$rootScope', '$document',
+    function ($imgPool,   $q,   $rootScope,   $document) {
       var _prepareQueue = [],
           _requestQuota = __config.requestLimit;
 
@@ -241,9 +245,13 @@ angular.module('ngImg', [])
             }
         }
 
-        var img = new Image();
+        if (!angular.isString(poolName)) {
+          poolName = $imgPool.config.defaultPoolName;
+        }
+
+        var img = $document[0].createElement('img');
         _enqueue(img, src, function (res) {
-          if (angular.isString(poolName) && res) {
+          if (res) {
             var pool = $imgPool(poolName);
             copies = copies || 1;
             while (copies--) {
