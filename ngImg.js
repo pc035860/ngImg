@@ -356,8 +356,8 @@ function ($imgPool,   $log,   $timeout) {
             iClass = scope.$eval(iAttrs.ngImgClass);
           }
 
-          if (angular.isDefined(src)) {
-            if ($img.length === 0) {
+          if ($img.length === 0) {
+            if (src !== '') {
               // new
               newImg = pool.get(src);
               if (newImg) {
@@ -371,32 +371,32 @@ function ($imgPool,   $log,   $timeout) {
                 $log.error('$imgPool failed to hit.', src);
               }
             }
-            else if ($img.prop('src') !== src) {
-              // change
-              
-              // put it back first
-              $img.remove();
-              if (iClass) {
-                removeClass($img, iClass);
-              }
-              pool.put($img.prop('src'), $img[0]);
-
-              // delayed for others put back done
-              $timeout(function () {
-                // get the new one
-                newImg = pool.get(src);
-                if (newImg) {
-                  iElm.append(newImg);
-
-                  if (iClass) {
-                    addClass(angular.element(newImg), iClass);
-                  }
-                }
-                else {
-                  $log.error('$imgPool failed to hit.', src);
-                }
-              });
+          }
+          else if ($img.prop('src') !== src) {
+            // change
+            
+            // put it back first
+            $img.remove();
+            if (iClass) {
+              removeClass($img, iClass);
             }
+            pool.put($img.prop('src'), $img[0]);
+
+            // delayed for others put back done
+            $timeout(function () {
+              // get the new one
+              newImg = pool.get(src);
+              if (newImg) {
+                iElm.append(newImg);
+
+                if (iClass) {
+                  addClass(angular.element(newImg), iClass);
+                }
+              }
+              else {
+                $log.error('$imgPool failed to hit.', src);
+              }
+            });
           }
         });
 
