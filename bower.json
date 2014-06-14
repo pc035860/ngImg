@@ -1,0 +1,17 @@
+{
+  "name": "ngImg",
+  "version": "0.0.2",
+  "description": "Best friend of handcrafted image loading in AngularJS",
+  "main": "ngImg.js",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "Gruntfile.js",
+    "package.json",
+    "test",
+    "tests"
+  ],
+  "dependencies": {},
+  "devDependencies": {}
+}
