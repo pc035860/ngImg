@@ -1,6 +1,6 @@
 {
   "name": "ngImg",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Best friend of handcrafted image loading in AngularJS.",
   "main": "index.js",
   "directories": {},
